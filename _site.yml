@@ -1,0 +1,7 @@
+name: "."
+title: "Alyssa's Postcard"
+description: |
+  Alyssa Zhang
+output_dir: "docs"
+theme: theme.css
+output: distill::distill_article
