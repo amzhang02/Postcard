@@ -1,0 +1,56 @@
+---
+title: "Linear Regression"
+description: |
+  I did some reading at the beginning of the summer to brush up on linear regression techniques. Here, I summarize what I reviewed and include example R code.
+output: 
+  distill::distill_article:
+    code_folding: true
+---
+
+## **Single Predictor**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(graphics)
+library(gridExtra)
+library(knitr)
+library(tidyverse)
+```
+
+Linear regression is used to fit a line of best fit between two variables $x$ and $y$. The standard form of the regression line is $y = b_0 + b_1x + e$ where $b_0$ and $b_1$ represent the model's intercept and slope and $e$ represents the error. If the data is a random sample, the values $b_0$, $b_1$, and $e$ are considered to be point estimates for the population parameters $\beta_0$ and $\beta_1$. When $x$ is used to predict $y$, then $x$ is the **predictor** and $y$ is the **outcome**.
+
+Before performing the linear regression itself, several assumptions must be checked for reliability's sake:
+
+  1. **Linearity**: the relationship between $x$ and $\hat{y}$ is linear
+  2. **Homoscedacity**: the variance of the residual is the same for any $x$
+  3. **Independence**: observations are independent of one another
+  4. **Normality**: for any fixed value of $x$, $y$ is normally distributed
+
+Another aspect of linear regression that will show up in R is the **residuals**, which is the leftover variation in the data after accounting for the model fit. Technically, the data can be described as $Data = Fit + Residual$. When an observation is above the regression line, then the residual ($e_i = y_i - \hat{y_i}$) is positive and negative if the observation is below the line. Residuals can also be plotted. It is a bit like tipping the regression line horizontally and looking at only the difference between the observations and the predictions. Doing this can let us see if there are still unaccounted-for patters in the data. 
+
+Correlation is the strength of a linear relationship denoted by $r$. The correlation is always between -1 and 1. -1 means perfect negative correlation and 1 means perfect positive correlation and near-zero means no correlation.
+
+Least squares regression is a more rigorous way of fitting a linear regression model. It is a model that seeks to minimize the vertical distance between observation and prediction. It is called the least squares regression line because it minimizes the variance (sum of the squares of the errors).
+
+Related to least squares regression, $R^2$ is used to describe the amount of variation in the outcome variable that is explained by the least squares line. $R^2$ will always be between 0 and 1.
+
+$$SST = (y_1 - \bar{y})^2 + (y_2 - \bar{y})^2 + ... + (y_n - \bar{y})^2$$
+$$SSE = (y_1 - \hat{y_1})^2 + (y_2 - \hat{y_2})^2 + ... + (y_n - \hat{y_n})^2$$
+$$R^2 = \frac{SST-SSE}{SST}$$
+
+## **Multiple Predictors**
+
+In linear regression with multiple predictors, there is one response variable but many predictors. When fitting a regression model with a categorical variable that has $k$ levels where $k > 2$, software will provide a coefficient for $k-1$ of the levels. The level without a coefficient is the reference level.
+
+$$\hat{y} = b_0 + b_1x_1 + b_2x_2 + b_3x_3 + ... + b_kx_k$$
+It's worth noting that $b_0, b_1, ..., b_k$ are calculated the same as the single predictor regression (minimize sum of squared residuals).
+
+Before getting into the regression, it is best practice to check the assumptions first:
+
+  1. **Linearity**: the relationship between the predictors and response variable must be linear
+  2. **Multivariate normality**: The residuals are normally distributed
+  3. **Multicolinearity**: the predictors are not highly correlated to each other
+  4. **Homoscedacity**: the variance of error terms are similar across predictors
+
+

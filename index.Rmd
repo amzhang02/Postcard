@@ -1,35 +1,29 @@
 ---
-title: "Alyssa Zhang"
-image: "pfp.jpg"
-links:
-  - label: LinkedIn
-    url: "https://www.linkedin.com/in/alyssa-zhang-13697a187/"
-  - label: GitHub
-    url: "https://github.com/amzhang02"
-  - label: Email
-    url: "amzhang02@gmail.com"
-output:
-  postcards::trestles
+title: "Home"
+description: |
+  Welcome to my website! This website documents the things I have contributed to my summer research with Sherry Huang, Riley Thompson, Horace Shew, and Thomas Daillak, led by Prof. Amanda Luby.
+site: distill::distill_website
 ---
- 
-## Bio
 
-I am a rising sophomore at Swarthmore College. I am planning to major in Statistics with a minor in Computer Science. Currently, I am doing summer research with Prof. Amanda Luby on fitting Item Response Theory models to forensic data like the White Box Study. Outside of academics, I enjoy running track & field and watching Formula 1.
+  The main focus of our research is using IRT-esque modeling to explore the [White Box Study][wbs] beyond what has already been seen. In this study, latent print examiners use  their expertise to determine whether or not the information contained in two fingerprints (or palm prints) is enough to say that the two prints are a match (from the same person). They do this by looking at corresponding minutae (unique patterns in certain places in the print). However, this conclusion is not objective, yet it is what gets presented at court. The purpose of the White Box Study was to clarify what factors influence sufficiency for individualization (saying that two prints are a match) or an inconclusive decision.
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(graphics)
+library(bookdown)
 
-## Education
+# Learn more about creating websites with Distill at:
+# https://rstudio.github.io/distill/website.html
 
-**Swarthmore College** | Swarthmore, PA
+# Learn more about publishing to GitHub Pages at:
+# https://rstudio.github.io/distill/publish_website.html#github-pages
 
-B.A. in Statistics & Computer Science | September 2020 - May 2024
+```
 
-**Catlin Gabel School** | Portland, OR
+```{r, include=TRUE, fig.cap="Mated vs non-mated latent and exemplar prints. Source: https://www.pnas.org/content/108/19/7733"}
 
-High School Diploma | September 2016 - June 2020
+include_graphics("mates.jpg")
 
-## Experience
-
-**Swarthmore College** | Summer Research Assistant | June 2021 - Present
-
-**Tutor Doctor** | Math Tutor | July 2019 - June 2020
-
-**Hangzhou Nenggong Technology Ltd.** | Web Design Intern | June 2018 - August 2018
+```
+[wbs]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4221158/pdf/pone.0110179.pdf "White Box Study paper"

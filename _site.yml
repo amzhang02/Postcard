@@ -1,7 +1,22 @@
 name: "."
-title: "Alyssa's Postcard"
+title: "Alyssa's Summer Research 2021"
 description: |
-  Alyssa Zhang
+  Summer 2021 Demo R Site
 output_dir: "docs"
+navbar:
+  search: true
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "Readings"
+      menu:
+        - text: "Linear Regression"
+        - href: linreg.html
+    - text: "White Box"
+      menu:
+        - text: "Survey Data"
+        - href: survey.html
+    - text: "Alyssa"
+      href: alyssa.html
 theme: theme.css
 output: distill::distill_article

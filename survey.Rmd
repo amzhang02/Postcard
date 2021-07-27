@@ -1,0 +1,77 @@
+---
+title: "WB Survey Data"
+description: |
+  I primarily focused on plotting the categorical data from the White Box Survey data. The White Box Survey is a survey given to participants in the study to gather personal information (i.e. sex, age) and occupational information (i.e. training, experience). 
+output: 
+  distill::distill_article:
+    code_folding: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(ggplot2)
+library(tidymodels)
+library(knitr)
+library(gcookbook)
+wbstudy <- read_excel("WhiteBox_PublicDataRelease.xlsx", sheet = 1)
+```
+
+I am interested in how the gender and education variables impact how difficult participants
+found the matches they were given. I am also curious about how representative this sample is of the population of fingerprint examiners so I will be doing outside readings to find that out. In the table below, you will find the variable names that I will be referring to with a snapshot of the data.
+
+```{r cleaning data, include=TRUE}
+wb_clean = wbstudy %>%
+  clean_names() %>%
+  mutate(x18_compare_numeric = as.numeric(factor(x18_compare_to_casework, 
+                                         levels = c("MUCH EASIER than casework",
+                                                    "EASIER than casework",
+                                                    "SIMILAR to casework",
+                                                    "HARDER than casework",
+                                                    "MUCH HARDER than casework"))))
+
+head(wb_clean)
+```
+First, I wanted to see the gender distribution of the respondents so I created a bar graph:
+
+```{r gender dist, include=TRUE}
+ggplot(wb_clean, aes(x1_sex)) +
+  geom_bar() + 
+  geom_text(aes(label = ..count..), stat = "count", vjust = 1.5, colour = "white") +
+  labs(title = "WB Survey Gender Distribution", x = "Gender", y = "Count")
+```
+To my surprise, there are more female respondents than there are male respondents. After seeing this, I wondered if this could be due to not every person responding to the post-experiment survey or if this actually is a representative sample of the latent examiner population. According to [Appendix SI-7][WBpaper] of the study, 170 examiners participated in the study while 169 responded to the background survey. 82% of these 170 participants are from the United States. In a quest to see whether this is actually representative of the population, I came across a website, [Zippia][zip], that uses machine learning to come up with a variety of statistics about different fields. According to Zippia, the job is about 56% female. In the White Box Study, females were over-represented by 2% which is not very much (it is about 3-4 people).
+
+Notes: correct vs all these background categories??
+
+```{r education}
+edu <- ggplot(wb_clean, aes(x3_education)) +
+  geom_bar() + 
+  geom_text(aes(label = ..count..), stat = "count", vjust = 1.5, colour = "white") +
+  labs(title = "WB Survey Education Level", x = "Degree", y = "Count")
+
+edu_gender <- ggplot(wb_clean, aes(x = x3_education, fill = x1_sex)) +
+  geom_bar() +
+  geom_text(aes(label = ..count..), stat = "count", position = ) +
+  labs(title = "WB Survey Education Level by Gender", x = "Degree", y = "Count")
+
+grid.arrange(grobs = list(edu, edu_gender), ncol = 2)
+
+```
+It was surprising to me to see a female-majority in a field that I expected to be male-dominant. This opened the door to many questions since I have never been in a majority-female academic space or field yet. I know from past experience that male-dominant fields (especially in the sciences) can get very discouraging and frustrating and for me, I ended up turning away from my initial major because of such culture. My next question was how education level varies between genders and if it has anything to do with how difficult the participants found the exercises. I did not know what to expect, since I was used to seeing and hearing about men being more highly educated in male-majority fields.
+
+```{r computer time}
+comp_time_diff <- ggplot(wb_clean, aes(x = x11_computer_based, fill = x18_compare_to_casework)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_text(aes(label = ..count..), stat = "count", position = ) +
+  labs(title = "WB Survey Difficulty Rating by Computer Time", x = "Computer Time Spent", y = "Count")
+
+comp_time_diff
+```
+
+[WBpaper]: file:///Users/azhang/Downloads/pone.0110179.s007.pdf "White Box Paper"
+[zip]: https://www.zippia.com/latent-fingerprint-examiner-jobs/demographics/ "Fingerprint examiner job demographics"
+
