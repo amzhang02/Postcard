@@ -8,14 +8,12 @@ navbar:
   right:
     - text: "Home"
       href: index.html
-    - text: "Readings"
-      menu:
-        - text: "Linear Regression"
-        - href: linreg.html
     - text: "White Box"
       menu:
         - text: "Survey Data"
         - href: survey.html
+        - text: "Determinations Data"
+        - href: determinations.html
     - text: "Alyssa"
       href: alyssa.html
 theme: theme.css

@@ -1,0 +1,143 @@
+---
+title: "WB Determinations Data"
+description: |
+  The White Box Determinations data was collected during the study where examiners were given pairs of prints to assign determinations to. Examiners were instructed to use a software program to mark minutiae on latent and exemplar prints while following the ACE-V process. Examiners first analyzed the latent print to see if it has any value. Then examiners were shown the exemplar print if the latent print does have value. After assigning a value determination to the exemplar print, examienrs made a comparison determination. For the purposes of this study, inconclusive and NA determinations were considered incorrect.
+output: 
+  distill::distill_article:
+    code_folding: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(openintro)
+library(ggridges)
+library(gcookbook)
+library(gridExtra)
+library(dplyr)
+library(ggthemes)
+wbstudyD <- read_excel("WhiteBox_PublicDataRelease.xlsx", sheet = 3)
+```
+
+```{r cleaning, include=FALSE}
+wb_clean <- wbstudyD %>%
+  clean_names()
+
+wb_correct <- wb_clean %>%
+ mutate(
+   correct = case_when(
+     (mating == "Mates" & comparison_determination == "ID") ~ 1,
+     (mating == "Non-mates" & comparison_determination == "Exclusion") ~ 1,
+     (mating == "Non-mates" & comparison_determination == "ID") ~ 0,
+     (mating == "Mates" & comparison_determination == "Exclusion") ~ 0,
+     (mating == "Mates" & comparison_determination == "None") ~ 0,
+     (mating == "Non-mates" & comparison_determination == "None") ~ 0,
+     (mating == "Mates" & comparison_determination == "Inconc") ~ 0,
+     (mating == "Non-mates" & comparison_determination == "Inconc") ~ 0,
+    )
+  )
+
+#wb_correct
+
+wb_correct_text <- wb_clean %>%
+ mutate(
+   correct = case_when(
+     (mating == "Mates" & comparison_determination == "ID") ~ "Correct",
+     (mating == "Non-mates" & comparison_determination == "Exclusion") ~ "Correct",
+     (mating == "Non-mates" & comparison_determination == "ID") ~ "Incorrect",
+     (mating == "Mates" & comparison_determination == "Exclusion") ~ "Incorrect",
+     (mating == "Mates" & comparison_determination == "None") ~ "Incorrect",
+     (mating == "Non-mates" & comparison_determination == "None") ~ "Incorrect",
+     (mating == "Mates" & comparison_determination == "Inconc") ~ "Incorrect",
+     (mating == "Non-mates" & comparison_determination == "Inconc") ~ "Incorrect",
+    )
+  )
+
+wb_difficulty_num <- wb_correct %>%
+  mutate(
+    diff_numeric = case_when(
+      (difficulty == "VERYEASY") ~ "EASIER",
+      (difficulty == "EASY") ~ "EASIER",
+      (difficulty == "MODERATE") ~ "MODERATE",
+      (difficulty == "DIFFICULT") ~ "HARDER",
+      (difficulty == "VERYDIFFICULT") ~ "HARDER",
+    )
+  )
+
+pairIDs_to_plot <- wb_difficulty_num %>%
+  group_by(pair_id) %>% summarize(count = n()) %>% filter(count > 14) 
+
+corresp_minutiae_toplot <- wb_difficulty_num %>%
+  group_by(corresp_minutiae) %>% summarize(count = n()) %>% filter(count > 0) 
+
+#wb_correct_text
+wb_difficulty_num
+```
+**Percentage of Correct Determinations**
+
+Before running any regressions, I wanted to explore the determinations data and pick out which variables were the most interesting and looked like the most relevant to correctness. From the bar plot below, it appears that the difficulty of which examiners found each pair plays a large role in whether the examiner makes a correct determination. Additionally, it appears that all errors made in the White Box study have been false positives.
+
+```{r ddpercent, include=TRUE}
+wb_correct_text$difficulty <- factor(wb_correct_text$difficulty,
+                                     levels = c("VERYEASY", "EASY", "MODERATE", "DIFFICULT", "VERYDIFFICULT"))
+  
+dd_percent <- ggplot(wb_correct_text %>% 
+                  filter(correct != "NA") %>% 
+                  filter(difficulty != "NA"), aes(x=difficulty, fill = correct)) +
+  geom_bar(position = "fill") +
+  ggtitle("Proportions of Correctness Per Difficulty Rating") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+dd_percent
+
+percent_correct <- ggplot(wb_correct_text %>% 
+                    filter(comparison_determination != "Inconc") %>% 
+                    filter(comparison_determination != "None"), aes(x=comparison_determination, fill = correct)) +
+  geom_bar(position = "fill") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle("Percent Correct Determinations") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+
+percent_correct
+```
+
+**Determination Types by Number of Minutiae (Latent & Exemplar)**
+
+From the scatterplot below, it looks like past around 10 exemplar minutiae, the likelihood that examiners ID the pair is much greater. Below 10 exemplar minutiae, examiners much more frequently exclude prints or dive inconclusive determinations. This can be explained by the nature of latent versus exempalr prints. Latent prints are usually left at a crime scene or elsewhere unintentionally, making the print quality lower and features less discernible. Exemplar prints are purposefully taken from a person so the quality will likely be higher. The reason why "none" determination appears linear is because examiners who answer that the latent print has "no value" do not see the exemplar print so the number of latent minutiae got pasted over to exemplar minutiae.
+
+```{r correctness}
+wb_difficulty_num$comparison_determination <- factor(wb_correct_text$comparison_determination,levels = c("ID", "Exclusion", "Inconc", "None"))
+
+all_values <- ggplot(wb_difficulty_num, aes(x = latent_minutiae, y = exemplar_minutiae, color = comparison_determination)) +
+  geom_point(alpha = 0.5) +
+  ggtitle("Total Minutiae Determinations") +
+  scale_color_manual(values = c("lightblue1", "lightskyblue", "steelblue2", "dodgerblue4")) +
+  theme_minimal()
+
+all_values
+```
+
+**Probability of Correctness**
+
+After deducing what kinds of pairs that examiners tend to get incorrect or be indecisive about are pairs that are rated above a moderate difficulty and have small exemplar minutiae counts, the question about the probability of success remained. The graph below is a visual representation of the logistic regression used to model the probability of correct determination for each difficulty level. At a certain point, the regression lines for "difficult" and "very difficult" intersect. this means that past a certain number of corresponding minutiae, examiners who rate a print as "very difficult" are actually more likely to determine it correctly than examiners who rate a print as "difficult". This appears to be an incongruency between believed difficulty and actual difficulty.
+
+```{r log reg}
+wb_correct$difficulty <- factor(wb_correct$difficulty, levels = c("VERYEASY", "EASY", "MODERATE", "DIFFICULT", "VERYDIFFICULT", "NA"))
+  
+corresponding_m <- ggplot(wb_correct %>% filter(difficulty != "NA"), aes(x=log(corresp_minutiae +1), y=correct, col = difficulty)) +
+  geom_point(alpha = 0.1) +
+  geom_jitter(position = position_jitter(width = 0.1, height = 0.1)) +
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
+  labs(title = "Probability of Correctness by Difficulty Level") +
+  scale_color_manual(values = c("lightblue1", "lightskyblue", "steelblue2", "dodgerblue4", "black")) +
+  theme_minimal()
+
+corresponding_m
+```
